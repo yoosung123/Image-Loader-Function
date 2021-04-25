@@ -1,0 +1,165 @@
+cursor("vertical-text");
+smooth();
+
+
+// Creating a scene variable
+var Scene = "loading-images";
+
+// create a function to hold all the variables and functions to load the graphics
+var Graphics = (function() {
+    // make a dictionary to store cached graphics
+    var cache = Object.create(null), 
+        // an array containing the names of the images
+        imgs_to_load = [], 
+        // a function to run when the loading is complete
+        onloadcomplete,
+        // the current index of the imgs_to_load array
+        cur_load = 0,
+        
+        //graphic factories
+        factories = {
+            /** Pattern to follow **/
+            /*
+            imageName: function() {
+                background(0, 0, 0, 0);
+                
+                
+                return get(x, y, width, height);
+            },
+            */
+            
+            // Example images
+            Graphic1: function() {
+                background(0, 0, 0, 0);
+                fill(255, 0, 0);
+                noStroke();
+                rectMode(CENTER);
+                rect(width/2, height/2, 25, 25);
+                
+                return get(0, 0, width, height);
+            },
+            Graphic2: function() {
+                background(0, 0, 0, 0);
+                fill(222, 0, 222);
+                ellipse(width/2, height/2, 25, 25);
+                
+                return get(0, 0, width, height);
+            },
+            Graphic3: function() {
+                background(0, 0, 0, 0);
+                
+                var s = 200;
+                for (var i = (width/2)-(s/2); i < (width/2)+(s/2); i+=s/25/2) {
+                    for (var j = (height/2)-(s/2); j < (height/2)+(s/2); j+=s/25/2) {
+                        fill(random(0, 200));
+                        noStroke();
+                        rect(i, j, s/25/2, s/25/2);
+                    }
+                }
+                
+                return get(0, 0, width, height);
+            },
+            Graphic4: function() {
+                background(0, 0, 0, 0);
+                noStroke();
+                fill(0, 200, 200);
+                triangle(width/2-(25/2), height/2+(25/2), width/2, height/2-(25/2), height/2+(25/2), height/2+(25/2));
+                
+                return get(0, 0, width, height);
+            },
+        };
+    
+    // returning a collection of functions stored in an object
+    return {
+        // access the respective image (give the image name)
+        get: function(img_name) {
+            
+            // if the image is already in "cache", just return the image 
+            if (img_name in cache) {
+                return cache[img_name];
+            }
+            
+            // otherwise, get image and store it in "cache"
+            return (cache[img_name] = factories[img_name]()); 
+        },
+        // (1. Create an array of the images you want to load,     
+        // 2. Give a function to evaluate when the loading is done)
+        setLoadQueue: function(arr, func) {
+            // arr is the array of images to load
+            imgs_to_load = arr;
+            // func is the function that evaluates once the function is complete
+            onloadcomplete = func;
+        },
+        // 
+        loadNext: function() {
+            // as long as they haven't all been loaded...
+            if (cur_load < imgs_to_load.length) {
+                // get (load) the image
+                this.get(imgs_to_load[cur_load]);
+                //de-reference the factory that draws the image
+                factories[imgs_to_load[cur_load]] = null;
+                // continue
+                cur_load++;
+            } else {
+                // run "onloadcomplete" once the loading has finished if it's a function then set it to "undefined"
+                if (typeof onloadcomplete === "function") {
+                    onloadcomplete();
+                    onloadcomplete = void 0;
+                }
+                
+                imgs_to_load.length = 0; // empty array
+                cur_load = 0; // reset current loading index
+            }
+        }
+    };
+})();
+
+//Setting what images to load. If you are putting images in other images (like to mask them!), make sure to put the image that you are putting in other image before the images you put them in.
+
+var graphicsNames = [];
+for (var i = 1; i < Graphics.factories+1; i++) {
+    graphicsNames.push("Graphics" + i.toString());
+}
+println(typeof Graphics.factories);
+Graphics.setLoadQueue(
+    //Specify what images you want to load 
+    //["Graphic1", "Graphic2", "Graphic3", "Graphic4"],
+    graphicsNames,
+    //What to do after the images you want to load are loaded
+    function() {
+        Scene = "menu";
+    }
+);
+
+var img = function(n) {
+    return Graphics.get(n);
+};
+
+draw = function() {
+    switch (Scene) {
+        case 'loading-images':
+            Graphics.loadNext();
+            background(255, 255, 255);
+            fill(0, 0, 0);
+            textSize(50);
+            textAlign(CENTER, CENTER);
+            text("Loading...", width/2, height/4);
+        break;
+        case 'menu':
+            background(200, 200, 200);
+            textAlign(CENTER, CENTER);
+            fill(0);
+            text("Loaded", width/2, height/4);
+            imageMode(CENTER);
+            
+            
+            // to call the image, simply type "Graphics.get('Image Name')"
+            image(img('Graphic1'), 50, 200);
+            
+            image(img("Graphic2"), 100, 200);
+            image(img("Graphic3"), 200, 200, 50, 50);
+            image(img("Graphic4"), 150, 200);
+        break;
+    }
+};
+println(graphicsNames.length);
