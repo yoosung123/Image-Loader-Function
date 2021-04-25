@@ -1,0 +1,537 @@
+smooth();
+
+
+var game;
+
+// The Mouse Functions [
+    var mouse = {
+        click: false,
+        out: false,
+        drag: false,
+        ovrBtn: false,
+        moved: false,
+        press: false,
+    };
+    // Click
+    function mouseClicked() {
+        mouse.click = true;
+        if (mouseButton === 37) {
+            mouse.Lclick = true;
+        }
+        if (mouseButton === 39) {
+            mouse.Rclick = true;
+        }
+    }
+    // Mouse Out
+    function mouseOut() {
+        mouse.out = true;
+    }
+    function mouseOver() {
+        mouse.out = false;
+    }
+    // Drag
+    function mouseDragged() {
+        mouse.drag = true;
+    }
+    
+//]
+// The Key Funtions [
+    var keys = [];
+    var keyR = false;
+    function keyPressed() {
+        keys[keyCode] = true;
+    }
+    function keyReleased() {
+        keys[keyCode] = false;
+        keyR = true;
+    }
+//]
+
+// VERY Important Functions [
+    function f() {
+        f();
+    }
+    function F() {
+        f();
+    }
+    function This(This, that) {
+        This.this=this.this.this.this.this.This.this.this.this.this.this.This.this.this.this.this.this.This.this.this.This.this.this.this.this.this.This.this.this.this.This.this.this.this.this.this.this.this.this.this.this.This.this.this.this.this.this.This.this.this.This.this.this.this.this.this.this.this.this.this.this.this.This.this.this.this.this.this.This.This=this.that=!!!!!!!!!!!!!!!!!true;
+        if (!!!!!!!this.This.This.this/this) {
+            for(var THIS=this.This;THIS<This.this;THIS+=this){}
+        }
+    }
+//]
+
+// The Money Stuff [
+    var money = {
+        $: 0, // Money
+        mps: 0, // Amount Per Second
+        earned: {
+            main: 0,
+            tree: 0,
+        },// Money Earned
+    };
+    
+    var moneyAdds = [];
+    function moneyAdd(i) {
+        var t = moneyAdds[i];
+        fill(0, 255, 0, t.a);
+        textSize(t.s);
+        textAlign(CENTER, CENTER);
+        text("+$"+t.$, t.x, t.y);
+        moneyAdds[i].y-=5;
+        if (t.y < -t.s) {
+            moneyAdds.splice(i, 1);
+        }
+    }
+//]
+
+
+// Set the screen number
+var screen = 0;
+// Make an array for the rooms
+var rooms = [];
+
+// The Information Panels [
+    var panel = {
+        rates: [],
+    };
+// ]
+
+// Screen 1 (Tree) Variables [
+    var tree = {
+        min: 1,
+        max: 10,
+        
+    };
+    var nuts = [];
+    var d = [0,0,0,0];
+    var Dd = 0;
+    function makeNut() {
+        if (random(100)<1) {
+            var randX = random(100, 500);
+            var randY = random(150, 250);
+            // Make the nut
+            nuts.push({
+                x: randX,
+                y: randY,
+                s: 50,
+                d: Dd,
+            });
+        }
+    }
+    var leaves = [];
+//]
+// Screen 2 (Rates) Variables [
+    panel.rates.push({
+        x: 100,
+        y: 100,
+        w: 100,
+        h: 50,
+        r: 5,
+        Fill: color(100, 100, 100),
+        Stroke: color(200, 200, 200),
+        tColor: color(0, 0, 0),
+        sw: 3,
+        tSize: 20,
+        Text: "$/s: "+money.mps,
+        info: "The amount of money per second.",
+    });
+    panel.rates.push({
+        x: 100,
+        y: 200,
+        w: 100,
+        h: 50,
+        r: 5,
+        Fill: color(100, 100, 100),
+        Stroke: color(200, 200, 200),
+        tColor: color(0, 0, 0),
+        sw: 3,
+        tSize: 20,
+        Text: "$/s: "+money.earned.main,
+        info: "",
+    });
+    panel.rates.push({
+        x: 100,
+        y: 300,
+        w: 100,
+        h: 50,
+        r: 5,
+        Fill: color(100, 100, 100),
+        Stroke: color(200, 200, 200),
+        tColor: color(0, 0, 0),
+        sw: 3,
+        tSize: 20,
+        Text: "$/s: "+money.earned.tree,
+        info: "",
+    });
+//]
+// Button Stuff [
+    function button() {}
+    var mouseOverButton = false;
+    button.rect = function(x, y, w, h, r, t, c, tc, sc, sw, ts, f) {
+        var _mouseOverButton = (function() {
+            if (mouseX > x-(w/2) && mouseX < x+(w/2) && mouseY > y-(h/2) && mouseY < y+(h/2)) {
+                mouseOverButton = true;
+            } else {
+                mouseOverButton = false;
+            }
+        })();
+        
+        
+        this.display = (function() {
+            rectMode(CENTER);
+            fill(c);
+            stroke(sc);
+            strokeWeight(sw);
+            if (mouseOverButton === true) {
+                fill(lerpColor(c, color(0), 0.1));
+                if (mouse.press) {
+                    fill(lerpColor(c, color(0), 0.2));
+                }
+                if (mouse.click) {
+                    fill(lerpColor(c, color(255), 0.1));
+                }
+            }
+            rect(x, y, w, h, r);
+            
+            fill(tc);
+            textSize(ts);
+            textAlign(CENTER, CENTER);
+            text(t, x, y);
+        })();
+        this.onClick = (function() {
+            if (mouseOverButton === true && mouse.click) {
+                f();
+            }
+        })();
+        
+    };
+    button.circle = function(x, y, s, r, t, c, tc, sc, sw, ts, f) {
+        var _mouseOverButton = (function() {
+            if (dist(mouseX, mouseY, x, y) < s/2) {
+                mouseOverButton = true;
+            } else {
+                mouseOverButton = false;
+            }
+        })();
+        
+        
+        this.display = (function() {
+            rectMode(CENTER);
+            fill(c);
+            stroke(sc);
+            strokeWeight(sw);
+            if (mouseOverButton === true) {
+                fill(lerpColor(c, color(0), 0.1));
+                if (mouse.press) {
+                    fill(lerpColor(c, color(0), 0.2));
+                }
+                if (mouse.click) {
+                    fill(lerpColor(c, color(255), 0.1));
+                }
+            }
+            ellipse(x, y, s, s);
+            
+            fill(tc);
+            textSize(ts);
+            textAlign(CENTER, CENTER);
+            text(t, x, y);
+        })();
+        this.onClick = (function() {
+            if (mouseOverButton === true && mouse.click) {
+                f();
+            }
+        })();
+        
+    };
+//]
+
+
+// Make The Rooms {
+    /******** ROOM __ ********/
+    /************************
+    rooms.push({
+        name: "NAME", // Type The Name
+        display: function() {
+            // Make the display
+        },
+    });
+    rooms.push({
+        name: "NAME",
+        display: function() {
+            
+        },
+    });
+    ************************/
+//}
+/**
+ * Money Generator
+ * Rate Screen
+ * Job Screen
+**/
+
+
+
+
+
+
+if (This.This === This.THIS) {
+    
+}
+
+
+
+
+
+
+
+rooms = [
+    /******** ROOM 0 (Main) ********/
+    function() {
+        background(0, 0, 100);
+        
+        // Make a variable for the information panels
+        function MainRoomPanel(x, y, w, h, ts) {
+            this.draw = (function() {
+                // Panel
+                fill(200);
+                stroke(100);
+                strokeWeight(10);
+                rectMode(CENTER);
+                rect(x, y, w, h);
+                
+                // Text
+                fill(0);
+                textSize(ts);
+                textAlign(CENTER, CENTER);
+                text("$"+money.$, x, y);
+            })();
+        }
+        
+        // Floor?
+        fill(150);
+        noStroke();
+        ellipse(width/2, height, width+100, 150);
+        
+        
+        // Money Panel
+        MainRoomPanel(width/2, 75, width-50, 100, 25);
+        
+        
+        // Clicking Button
+        button.rect(300, 200, 50, 50, 5, "$", color(75), color(100), color(100), 10, 30,
+        function(){
+            money.$++;
+            moneyAdds.push({
+                x: mouseX,
+                y: mouseY,
+                s: 20,
+                a: 255,
+                $: 1,
+            });
+            money.earned.main++;
+        });
+        
+        
+        // Right Button
+        button.rect(550, 400, 50, 50, 5, ">>", color(75), color(100), color(100), 5, 30, function(){screen = 1;});
+    },
+    /******** ROOM 1 (Tree) ********/
+    function() {
+        background(255, 0, 0);
+        
+        // Nut Variables
+        function nut(t) {
+            var C = nuts[t];
+            var dDd = C.d;
+            this.display = (function() {
+                fill(C.c);
+                rectMode(CENTER);
+                stroke(1);
+                strokeWeight(2);
+                ellipse(C.x, C.y, C.s, C.s);
+            })();
+            this.move = (function() {
+                var frmR = (this.__frameRate/12);
+                if (C.y < 575) {
+                    nuts[t].y+=6;
+                }
+            })();
+            this.OnClick = (function() {
+                if (mouse.press && dist(mouseX, mouseY, C.x, C.y) < C.s/2) {
+                    nuts.splice(t, 1);
+                    d[dDd]--;
+                    var nutMoneyGain = floor(random(tree.min, tree.max));
+                    money.$+=nutMoneyGain;
+                    money.earned.tree += nutMoneyGain;
+                    moneyAdds.push({
+                        x: mouseX,
+                        y: mouseY,
+                        s: 20,
+                        a: 255,
+                        $: nutMoneyGain,
+                    });
+                }
+            })();
+        }
+        
+        // Make The tree {
+            var Tree = (function() {
+                // Stem
+                noStroke();
+                fill(100, 50, 0);
+                rectMode(CENTER);
+                rect(300, 500, 100, 400);
+                
+                // Make the nuts
+                for (var t = nuts.length-1; t > 0; t--) {
+                    nut(t);
+                }
+                
+                // Leaves
+                if (leaves.length < 200) {
+                    for (var t = 0; t < 50; t++) {
+                        leaves.push([random(200, 400), random(100, 300)]);
+                    }
+                    for (var t = 0; t < 50; t++) {
+                        leaves.push([random(100, 500), random(150, 250)]);
+                    }
+                }
+                for (var i = leaves.length-1; i > 0; i--) {
+                    fill(0, 200, 0);
+                    noStroke();
+                    ellipse(leaves[i][0], leaves[i][1], 100, 100);
+                }
+            })();
+            
+        //}
+        
+        
+        
+        // Left Button
+        button.rect(50, 300, 50, 50, 5, "<<", color(75), color(100), color(100), 5, 30, function(){screen = 0;});
+        // Right Button
+        button.rect(550, 300, 50, 50, 5, ">>", color(75), color(100), color(100), 5, 30, function(){screen = 2;});
+    },
+    /******** ROOM 2 (Rates) ********/
+    function() {
+        background(100);
+        
+        
+        // Make a variable for the information panels
+        function RateRoomPanel(i) {
+            var t = panel.rates[i];
+            this.draw = (function() {
+                // Panel
+                fill(t.Fill);
+                stroke(t.Stroke);
+                strokeWeight(t.sw);
+                rectMode(CENTER);
+                rect(t.x, t.y, t.w, t.h, t.r);
+                
+                // Text
+                fill(t.tColor);
+                textSize(t.tSize);
+                textAlign(CENTER, CENTER);
+                text(t.Text, t.x, t.y);
+            })();
+            this.onRightClick = (function() {
+                this.infoBox = function(x, y, w, h, t, a) {
+                    rectMode(CORNER);
+                    
+                    fill(0, a);
+                    stroke(200, a);
+                    strokeWeight(5);
+                    rect(x, y, w, h);
+                    
+                    fill(255, a);
+                    textSize(12);
+                    textAlign(LEFT, TOP);
+                    text(t, x+15, y+5, w-30, h-10);
+                };
+                
+                
+                
+                if (
+                    //this.Rclick &&
+                    mouseX > t.x-(t.w/2) &&
+                    mouseX < t.x+(t.w/2) &&
+                    mouseY > t.y-(t.h/2) &&
+                    mouseY < t.y+(t.h/2)) {
+                    this.infoBox(mouseX, mouseY, 100, 55, t.info, t.infoA);
+                }
+                if (mouseButton === 37 && mouse.click) {
+                    this.RClick = true;
+                }
+                if (mouse.moved || mouse.click) {
+                    this.Rclick = false;
+                }
+            })();
+        }
+        for (var i = panel.rates.length-1; i < 0; i--) {
+            RateRoomPanel(i);
+        }
+        
+        button.rect(50, 400, 50, 50, 5, "<<", color(75), color(150), color(175), 5, 30, function(){screen = 1;});
+        
+    },
+    /******** ROOM 3 () ********/
+    function() {
+        
+    },
+];
+    
+    
+/*************************/
+/*************************/
+/*************************/
+function game() {
+    // Display The Rooms
+    rooms[screen]();
+    makeNut();
+    for (var i = moneyAdds.length; i > 0; i--) {
+        moneyAdd(i);
+    }
+    
+}
+/*************************/
+/*************************/
+/*************************/
+
+
+var doc;for(var d=0;d<100;d++){if(d>=5){continue;}doc+=(d+", ");}println("\n\n\n"+doc+"\n");
+
+
+frameRate(60);
+function draw() {
+    try {
+        game();
+    } catch (e) {
+        println("Oh Noes!\n    "+e);
+    } finally {
+        // Update some of the the variables
+        this.updateVars = (function() {
+            keyR = false;
+            mouse.click = false;
+            mouse.Lclick = false;
+            mouse.Rclick = false;
+            mouse.drag = false;
+            mouse.press = false;
+            if (mouseX !== pmouseX || mouseY !== pmouseY) {
+                mouse.moved = true;
+            } else if (mouseX === pmouseX || mouseY === pmouseY) {
+                mouse.moved = false;
+            }
+            
+            if (mouseIsPressed) {
+                mouse.press = true;
+            } else {
+                mouse.press = false;
+            }
+        })();
+    }
+    
+    _clearLogs();
+    println(money.earned.tree+"\n"+round(this.__frameRate));
+}
